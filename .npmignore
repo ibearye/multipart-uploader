@@ -1,0 +1,11 @@
+example
+node_modules
+.prettierrc
+.eslint.js
+.gitignore
+.git
+src
+webpack.config.js
+tsconfig.json
+babel.config.js
+test

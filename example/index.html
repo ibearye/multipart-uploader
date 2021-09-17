@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
+    <title>Document</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script src="../dist/multi-uploader.js"></script>
+  </head>
+  <body>
+    <input id="file" type="file" />
+    <button id="upload">上传</button>
+    <button id="start">开始</button>
+    <button id="pause">暂停</button>
+    <script>
+      const file = document.getElementById('file');
+      const upload = document.getElementById('upload');
+      const start = document.getElementById('start');
+      const pause = document.getElementById('pause');
+
+      upload.onclick = function () {
+        const uploader = new MultiUploader({ file: file.files[0] });
+      };
+    </script>
+  </body>
+</html>
