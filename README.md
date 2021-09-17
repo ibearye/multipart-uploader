@@ -1,5 +1,7 @@
 # MultipartUploader
 
+![](https://img.shields.io/npm/dy/multipart-uploader) ![](https://img.shields.io/npm/l/multipart-uploader?style=flat) ![](https://img.shields.io/npm/v/multipart-uploader)
+
 A customizable, useful and wonderful multi-part file uploader, support "resume from break-point".
 
 ## Install
