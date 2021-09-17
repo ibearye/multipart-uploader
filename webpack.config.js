@@ -30,9 +30,21 @@ module.exports = {
   },
 
   module: {
-    rules: [{ test: /\.js$/, use: 'babel-loader', exclude: /core-js/ }],
     rules: [
+      { test: /\.js$/, use: 'babel-loader', exclude: /core-js/ },
       { test: /\.ts$/, use: ['babel-loader', 'ts-loader'], exclude: /core-js/ },
+      {
+        test: /\.worker.js$/,
+        use: [
+          {
+            loader: 'worker-loader',
+            options: {
+              inline: 'fallback',
+              filename: 'compute-md5.worker.js',
+            },
+          },
+        ],
+      },
     ],
   },
 
