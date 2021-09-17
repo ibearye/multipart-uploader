@@ -13,7 +13,8 @@ import {
   MUMergeParams,
   MU_DEFAULT_OPTION_TYPE,
   MU_OPTION_TYPE,
-  MUOptions,
+  MU_Options,
+  MU_DEFAULT_OPTIONS,
 } from './types';
 
 export default class MultipartUploader {
@@ -26,7 +27,7 @@ export default class MultipartUploader {
 
   active = false;
 
-  private readonly _options: MUOptions = null;
+  private readonly _options: MU_Options = null;
 
   private listeners: MUEventListeners = {
     [MU_EVENT_TYPE.BEFORE_COMPUTE_MD5]: new Set(),
@@ -44,7 +45,7 @@ export default class MultipartUploader {
 
   [key: string | symbol]: any;
 
-  constructor(options: MUOptions) {
+  constructor(options: MU_Options) {
     this.file = options.file;
     this._options = options;
 
@@ -308,7 +309,7 @@ export default class MultipartUploader {
   }
 
   // unified options getter
-  private readonly options: MUOptions = new Proxy(
+  private readonly options: MU_Options = new Proxy(
     { ...this._options },
     {
       get: (_, key: MU_OPTION_TYPE) => {
@@ -320,63 +321,53 @@ export default class MultipartUploader {
     }
   );
 
-  static defaults = new Proxy(
-    {
-      ...MultipartUploader.prototype,
+  static defaults: MU_DEFAULT_OPTIONS = {
+    [MU_DEFAULT_OPTION_TYPE.CHUNK_SIZE]: 1024 * 1024 * 25,
+
+    [MU_DEFAULT_OPTION_TYPE.CHECK_API]: '',
+    [MU_DEFAULT_OPTION_TYPE.UPLOAD_API]: '',
+    [MU_DEFAULT_OPTION_TYPE.MERGE_API]: '',
+    [MU_DEFAULT_OPTION_TYPE.CHECK_EACH_CHUNK]: true,
+    [MU_DEFAULT_OPTION_TYPE.CONCURRENT_LIMIT]: 8,
+
+    [MU_DEFAULT_OPTION_TYPE.CUSTOM_CHECK_REQUEST](
+      params: MUCheckParams
+    ): MUCustomRequest {
+      const p: { [key: string]: any } = params;
+      p.filename = p.file.name;
+      Reflect.deleteProperty(p, 'file');
+
+      return {
+        params: p,
+      };
     },
-    {
-      get(_, key: MU_DEFAULT_OPTION_TYPE) {
-        return MultipartUploader.prototype[key];
-      },
-      set(_, key: MU_DEFAULT_OPTION_TYPE, value) {
-        MultipartUploader.prototype[key] = value;
-        return true;
-      },
-    }
-  );
 
-  [MU_DEFAULT_OPTION_TYPE.CUSTOM_CHECK_REQUEST](
-    params: MUCheckParams
-  ): MUCustomRequest {
-    const p: { [key: string]: any } = params;
-    p.filename = p.file.name;
-    Reflect.deleteProperty(p, 'file');
+    [MU_DEFAULT_OPTION_TYPE.CUSTOM_UPLOAD_REQUEST](
+      params: MUUploadParams
+    ): MUCustomRequest {
+      const { chunk, chunkNumber, md5, file } = params;
+      const data = new FormData();
+      data.append('chunk', chunk);
+      data.append('chunkNumber', String(chunkNumber));
+      data.append('filename', file.name);
+      data.append('md5', md5);
+      return {
+        data,
+      };
+    },
 
-    return {
-      params: p,
-    };
-  }
+    [MU_DEFAULT_OPTION_TYPE.CUSTOM_MERGE_REQUEST](
+      params: MUMergeParams
+    ): MUCustomRequest {
+      const { md5, file, chunks } = params;
+      return { data: { md5, filename: file.name, chunks } };
+    },
 
-  [MU_DEFAULT_OPTION_TYPE.CUSTOM_UPLOAD_REQUEST](
-    params: MUUploadParams
-  ): MUCustomRequest {
-    const { chunk, chunkNumber, md5, file } = params;
-    const data = new FormData();
-    data.append('chunk', chunk);
-    data.append('chunkNumber', String(chunkNumber));
-    data.append('filename', file.name);
-    data.append('md5', md5);
-    return {
-      data,
-    };
-  }
-
-  [MU_DEFAULT_OPTION_TYPE.CUSTOM_MERGE_REQUEST](
-    params: MUMergeParams
-  ): MUCustomRequest {
-    const { md5, file, chunks } = params;
-    return { data: { md5, filename: file.name, chunks } };
-  }
-
-  [MU_DEFAULT_OPTION_TYPE.SHOULD_UPLOAD]() {
-    return true;
-  }
+    [MU_DEFAULT_OPTION_TYPE.SHOULD_UPLOAD](
+      checkRes: any,
+      params: MUUploadParams
+    ): boolean {
+      return true;
+    },
+  };
 }
-
-MultipartUploader.prototype[MU_DEFAULT_OPTION_TYPE.CHUNK_SIZE] =
-  1024 * 1024 * 25;
-MultipartUploader.prototype[MU_DEFAULT_OPTION_TYPE.CHECK_API] = '';
-MultipartUploader.prototype[MU_DEFAULT_OPTION_TYPE.UPLOAD_API] = '';
-MultipartUploader.prototype[MU_DEFAULT_OPTION_TYPE.MERGE_API] = '';
-MultipartUploader.prototype[MU_DEFAULT_OPTION_TYPE.CHECK_EACH_CHUNK] = true;
-MultipartUploader.prototype[MU_DEFAULT_OPTION_TYPE.CONCURRENT_LIMIT] = 8;

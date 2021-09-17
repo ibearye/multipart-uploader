@@ -9,7 +9,7 @@ const TerserWebpackPlugin = require('terser-webpack-plugin');
 
 module.exports = {
   entry: {
-    'multipart-uploader': './src/index.ts',
+    index: './src/index.ts',
     'compute-md5': './src/libs/compute-md5.ts',
   },
 

@@ -60,8 +60,21 @@ export enum MU_EXTRA_OPTION_TYPE {
 
 export type MU_OPTION_TYPE = MU_EXTRA_OPTION_TYPE & MU_DEFAULT_OPTION_TYPE;
 
-export interface MUOptions {
+export interface MU_Options {
   file: File;
+  chunkSize?: number;
+  checkApi?: string;
+  uploadApi?: string;
+  mergeApi?: string;
+  checkEachChunk?: boolean;
+  customCheckRequest?: (params: MUCheckParams) => MUCustomRequest;
+  customUploadRequest?: (params: MUUploadParams) => MUCustomRequest;
+  customMergeRequest?: (params: MUMergeParams) => MUCustomRequest;
+  shouldUpload?: (checkRes?: unknown, params?: MUUploadParams) => boolean;
+  concurrentLimit?: number;
+}
+
+export interface MU_DEFAULT_OPTIONS {
   chunkSize?: number;
   checkApi?: string;
   uploadApi?: string;
