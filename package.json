@@ -1,6 +1,6 @@
 {
   "name": "multipart-uploader",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "A customizable, useful and wonderful multi-part file uploader, support \"resume from break-point\".",
   "main": "dist/multipart-uploader.js",
   "module": "dist/multipart-uploader.js",
@@ -21,7 +21,7 @@
     "multipart upload",
     "assume from break-point"
   ],
-  "author": "bearye",
+  "author": "Bearye <ibearye@163.com> (https://bearye.cn)",
   "license": "MIT",
   "devDependencies": {
     "@babel/preset-env": "^7.15.6",
