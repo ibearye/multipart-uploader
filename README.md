@@ -57,7 +57,7 @@ uploader.on('finish-compute-md5', () => {
 | chunkSize           | `number`   |         | `1024 * 1024 * 25` | each chunk size that divided.                                                     |
 | checkApi            | `string`   |         |                    | check api.                                                                        |
 | uploadApi           | `string`   |         |                    | upload api.                                                                       |
-| mergeAp             | `string`   |         |                    | merge api.                                                                        |
+| mergeApi            | `string`   |         |                    | merge api.                                                                        |
 | checkEachChunk      | `boolean`  |         | `false`            | whether make a check request for each chunk or not.                               |
 | concurrentLimit     | number     |         | `8`                | how many chunks are being uploaded at a time.                                     |
 | customCheckRequest  | `Function` |         | \*                 | custom the check request, the option detail is in below.                          |
@@ -75,8 +75,8 @@ This option is a function, one param will be provided, and the param is an Objec
 1. `file: File` - the uploaded file;
 2. `md5: string` - the md5 of file;
 3. `chunks: number` - the count of file chunks;
-4. `chunk?: Blob` - the chunk of curent upload task, this options will be provied while the `checkEachChunk` option is `true`;
-5. `chunkNumber?: number` - the number of current chunk in `chunkList`. it also will be provied while the `checkEachChunk` option is `true`.
+4. `chunk?: Blob` - the chunk of curent upload task, this options will be provided while the `checkEachChunk` option is `true`;
+5. `chunkNumber?: number` - the number of current chunk in `chunkList`. it also will be provided while the `checkEachChunk` option is `true`.
 
 And funcion should return an Object contains these optional properties:
 
@@ -85,7 +85,7 @@ And funcion should return an Object contains these optional properties:
 3. `params?: Object` - request params, is key-value Object, default is `{}` while missing;
 4. `data?: any` - request data, default is `null` while missing.
 
-for a further understandding, here is the builtin `customCheck` function:
+for a further understandding, here is the builtin `customCheckRequest` function:
 
 ```javascript
 function(params) {
@@ -104,10 +104,10 @@ After understandding this option, you can configure `customUploadReqeust` and `c
 
 It is very similar to customCheckRequest. the only difference is the param `chunk` and `chunkNumber` always exist.
 
-Here is the builtin `shouldMerge` function:
+Here is the builtin `customUploadRequest` function:
 
 ```javascript
-function(params): MUCustomRequest {
+function(params) {
   const { chunk, chunkNumber, md5, file } = params;
   const data = new FormData();
   data.append('chunk', chunk);
@@ -124,10 +124,10 @@ function(params): MUCustomRequest {
 
 the Obvious truth is that there is no things need to describe. but you should know that, the function param `chunk` and `chunkNumber` always do not exist.
 
-Here is the builtin `shouldMerge` function:
+Here is the builtin `customMergeRequest` function:
 
 ```javascript
-function(params): MUCustomRequest {
+function(params) {
   const { md5, file, chunks } = params;
   return { data: { md5, filename: file.name, chunks } };
 }
@@ -143,7 +143,7 @@ the second param is an Object contains `file`, `md5`, `chunks`, `chunk`, `chunkN
 
 You should return an boolean value, true makes chunk to upload, false makes not.
 
-This is builtin `shouldUpload` function below, obviously, it do not support "resume from break-point", it pass every chunks to be uploaded:
+This is the builtin `shouldUpload` function below, obviously, it do not support "resume from break-point", it pass every chunks to be uploaded:
 
 ```javascript
 function() {
@@ -159,7 +159,7 @@ Here is the builtin `shouldMerge` function:
 
 ```javascript
 function() {
-	return true;
+  return true;
 }
 ```
 
@@ -238,15 +238,21 @@ Remove a listener from uploader.
 
 ### Events
 
-| Event | Callback |
-| ----- | -------- |
-|   `before-compute-md5`    | `() => any` |
-|    `finish-compute-md5`   | `(md5: string) => any` |
-|    `before-upload`   | `() => any` |
-|   `uploading`     | `() => any` |
-|   `finish-upload`    | `() => any` |
-|    `progress`   | `({uploaded: number, percent: number}) => any` |
-|   `before-merge`    | `() => any` |
-|   `finish-merge`   | `(mergeRes: any) => any` |
-|   `paused`    | `() => any` |
+| Event                | Callback                                       |
+| -------------------- | ---------------------------------------------- |
+| `before-compute-md5` | `() => any`                                    |
+| `finish-compute-md5` | `(md5: string) => any`                         |
+| `before-upload`      | `() => any`                                    |
+| `uploading`          | `() => any`                                    |
+| `finish-upload`      | `() => any`                                    |
+| `progress`           | `({uploaded: number, percent: number}) => any` |
+| `before-merge`       | `() => any`                                    |
+| `finish-merge`       | `(mergeRes: any) => any`                       |
+| `paused`             | `() => any`                                    |
 
+## Example
+
+look `./examle` folder. The web-side demo is base on VUE.
+
+> ❗️❗️❗️Do not use the example code for you upload service❗️❗️❗️
+> ❗️❗️❗️The example is only for dev-test, there are a lot of problems in demo-code.❗️❗️❗️
