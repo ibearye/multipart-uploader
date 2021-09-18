@@ -51,19 +51,20 @@ uploader.on('finish-compute-md5', () => {
 
 #### options
 
-| Option              | Type       | Requred | Default            | Desciption                                                                     |
-| ------------------- | ---------- | ------- | ------------------ | ------------------------------------------------------------------------------ |
-| file                | `File`     | ✅      |                    | the file to be uploaded.                                                       |
-| chunkSize           | `number`   |         | `1024 * 1024 * 25` | each chunk size that divided.                                                  |
-| checkApi            | `string`   |         |                    | check api.                                                                     |
-| uploadApi           | `string`   |         |                    | upload api.                                                                    |
-| mergeAp             | `string`   |         |                    | merge api.                                                                     |
-| checkEachChunk      | `boolean`  |         | `false`            | whether request the check api for each chunk or not.                           |
-| concurrentLimit     | number     |         | `8`                | how many chunks are being uploaded at a time.                                  |
-| customCheckRequest  | `Function` |         | \*                 | custom the check request, the option detail is below.                          |
-| customUploadRequest | `Function` |         | \*                 | custom the upload request, the option detail is below.                         |
-| customMergeRequest  | `Function` |         | \*                 | custom the merge request, the option detail is below.                          |
-| shouldUpload        | `Function` |         | \*                 | decide current chunk whether should upload or not, the option detail is below. |
+| Option              | Type       | Requred | Default            | Desciption                                                                        |
+| ------------------- | ---------- | ------- | ------------------ | --------------------------------------------------------------------------------- |
+| file                | `File`     | ✅      |                    | the file to be uploaded.                                                          |
+| chunkSize           | `number`   |         | `1024 * 1024 * 25` | each chunk size that divided.                                                     |
+| checkApi            | `string`   |         |                    | check api.                                                                        |
+| uploadApi           | `string`   |         |                    | upload api.                                                                       |
+| mergeAp             | `string`   |         |                    | merge api.                                                                        |
+| checkEachChunk      | `boolean`  |         | `false`            | whether make a check request for each chunk or not.                               |
+| concurrentLimit     | number     |         | `8`                | how many chunks are being uploaded at a time.                                     |
+| customCheckRequest  | `Function` |         | \*                 | custom the check request, the option detail is in below.                          |
+| customUploadRequest | `Function` |         | \*                 | custom the upload request, the option detail is in below.                         |
+| customMergeRequest  | `Function` |         | \*                 | custom the merge request, the option detail is in below.                          |
+| shouldUpload        | `Function` |         | \*                 | decide current chunk whether should upload or not, the option detail is in below. |
+| shouldMerge         | `Function` |         | \*                 | decide whether should make a merge request or not, the option detail is in below. |
 
 > All options exclude `file` can be configured in `MultipartUploader.defaults`❗️❗️❗️
 
@@ -103,9 +104,34 @@ After understandding this option, you can configure `customUploadReqeust` and `c
 
 It is very similar to customCheckRequest. the only difference is the param `chunk` and `chunkNumber` always exist.
 
+Here is the builtin `shouldMerge` function:
+
+```javascript
+function(params): MUCustomRequest {
+  const { chunk, chunkNumber, md5, file } = params;
+  const data = new FormData();
+  data.append('chunk', chunk);
+  data.append('chunkNumber', String(chunkNumber));
+  data.append('filename', file.name);
+  data.append('md5', md5);
+  return {
+    data,
+  };
+}
+```
+
 #### customMergeRequest
 
 the Obvious truth is that there is no things need to describe. but you should know that, the function param `chunk` and `chunkNumber` always do not exist.
+
+Here is the builtin `shouldMerge` function:
+
+```javascript
+function(params): MUCustomRequest {
+  const { md5, file, chunks } = params;
+  return { data: { md5, filename: file.name, chunks } };
+}
+```
 
 #### shouldUpload
 
@@ -125,6 +151,18 @@ function() {
 }
 ```
 
+#### shouldMerge
+
+The returns of this function will decide to whether make merge request or not fater finishing uploading all chunks. This function has one Object param contains `file`, `md5`, `chunks` properties.
+
+Here is the builtin `shouldMerge` function:
+
+```javascript
+function() {
+	return true;
+}
+```
+
 ### Property
 
 #### static `defaults`: Object
@@ -140,6 +178,8 @@ The default configurations. You can configure it and every instances of Multipar
 7. `defaults.customCheckRequest: Function`;
 8. `defaults.customUploadRequest: Function`;
 9. `defaults.customMergeRequest: Function`.
+10. `defaults.shouldUpload: Function`.
+11. `defaults.shouldMerge: Function`.
 
 #### readonly `file`: File
 
@@ -174,18 +214,39 @@ the uploading progress.
 
 ### Method
 
-#### assume()
+#### assume(): Promise<boolean>
 
 Start or continue to upload, it should be call after the event `finish-compute-md5` was fired.
 
-#### pause()
+#### pause(): Promise<boolean>
 
 Pause the upload mission.
 
-#### on(event: string, callback: Function)
+#### merge(): Promise<any>
+
+merge chunks to a file. This function will be call when all chunks were uploaded, and `shouldMerge` function returns `true`;
+
+You can configure the `shouldMerge` function to return false, then do something else, and call `merge` function yourself.
+
+#### on(event: string, callback: Function): never
 
 Add a listener to uploader, the function will be called while firing events related.
 
-#### off(event, callback: Function)
+#### off(event, callback: Function): never
 
 Remove a listener from uploader.
+
+### Events
+
+| Event | Callback |
+| ----- | -------- |
+|   `before-compute-md5`    | `() => any` |
+|    `finish-compute-md5`   | `(md5: string) => any` |
+|    `before-upload`   | `() => any` |
+|   `uploading`     | `() => any` |
+|   `finish-upload`    | `() => any` |
+|    `progress`   | `({uploaded: number, percent: number}) => any` |
+|   `before-merge`    | `() => any` |
+|   `finish-merge`   | `(mergeRes: any) => any` |
+|   `paused`    | `() => any` |
+

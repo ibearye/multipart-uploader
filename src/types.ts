@@ -33,7 +33,7 @@ export enum MU_EVENT_TYPE {
   FINISH_UPLOAD = 'finish-upload',
   PROGRESS = 'progress',
   BEFORE_MERGE = 'before-merge',
-  FINISH_MERGE = 'finish_merge',
+  FINISH_MERGE = 'finish-merge',
   PAUSED = 'paused',
   ERROR = 'error',
 }
