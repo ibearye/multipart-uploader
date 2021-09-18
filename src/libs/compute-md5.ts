@@ -1,13 +1,9 @@
 // @ts-ignore
-import Worker from './compute-md5.worker.js';
+import Worker from './compute-md5.worker.ts';
 
-import {
-  WorkerRequestMessage,
-  WorkerResponseMessage,
-  ComputedData,
-} from './types';
+import { WorkerResponseMessage, ComputedData } from './types';
 
-export default function computeMD5(data: ComputedData) {
+export default function computeMD5(data: ComputedData): Promise<string> {
   return new Promise((resolve, reject) => {
     const woker = new Worker();
 

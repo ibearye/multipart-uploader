@@ -1,6 +1,9 @@
+// @ts-ignore
 import * as SparkMD5 from 'spark-md5';
 
-self.addEventListener('message', (e) => {
+import { WorkerRequestMessage } from './types';
+
+self.addEventListener('message', (e: MessageEvent<WorkerRequestMessage>) => {
   const {
     data: { file, chunkList, chunkSize },
   } = e;
@@ -16,7 +19,9 @@ self.addEventListener('message', (e) => {
   fileReader.addEventListener('load', (e) => {
     spark.append(e.target.result);
 
-    const message = { percent: currentChunk / chunks };
+    const message: { percent: number; md5?: string } = {
+      percent: currentChunk / chunks,
+    };
     if (currentChunk >= chunks) {
       message.md5 = spark.end();
       self.postMessage(message);

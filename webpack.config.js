@@ -31,10 +31,9 @@ module.exports = {
 
   module: {
     rules: [
-      { test: /\.js$/, use: 'babel-loader', exclude: /core-js/ },
-      { test: /\.ts$/, use: ['babel-loader', 'ts-loader'], exclude: /core-js/ },
+      // { test: /\.js$/, use: 'babel-loader', exclude: /core-js/ },
       {
-        test: /\.worker.js$/,
+        test: /\.worker.ts$/,
         use: [
           {
             loader: 'worker-loader',
@@ -45,6 +44,7 @@ module.exports = {
           },
         ],
       },
+      { test: /\.ts$/, use: ['babel-loader', 'ts-loader'], exclude: /core-js/ },
     ],
   },
 

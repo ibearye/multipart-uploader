@@ -222,31 +222,7 @@ export default class MultipartUploader {
         );
       }
 
-      const {
-        method = 'POST',
-        headers = {},
-        params = {},
-        data = null,
-      } = this.options.customMergeRequest({
-        file: this.file,
-        md5: this.md5,
-        chunks: this.chunks,
-      });
-
-      this.fire(MU_EVENT_TYPE.BEFORE_MERGE);
-
-      const mergeRes = await Axios({
-        url: this.options.mergeApi,
-        method,
-        headers,
-        params,
-        data,
-      });
-
-      this.active = false;
-      this.fire(MU_EVENT_TYPE.FINISH_MERGE, mergeRes);
-
-      return mergeRes;
+      return await this.merge();
     } catch (err) {
       if (err && err.message === MU_PAUSE_ACTION) {
         this.fire(MU_EVENT_TYPE.PAUSED);
@@ -271,6 +247,34 @@ export default class MultipartUploader {
         return false;
       }
     }
+  }
+
+  async merge() {
+    this.fire(MU_EVENT_TYPE.BEFORE_MERGE);
+
+    const {
+      method = 'POST',
+      headers = {},
+      params = {},
+      data = null,
+    } = this.options.customMergeRequest({
+      file: this.file,
+      md5: this.md5,
+      chunks: this.chunks,
+    });
+
+    const mergeRes = await Axios({
+      url: this.options.mergeApi,
+      method,
+      headers,
+      params,
+      data,
+    });
+
+    this.active = false;
+    this.fire(MU_EVENT_TYPE.FINISH_MERGE, mergeRes);
+
+    return mergeRes;
   }
 
   // unified event firer
