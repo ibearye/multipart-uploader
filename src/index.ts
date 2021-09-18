@@ -5,16 +5,17 @@ const { CancelToken } = Axios;
 const MU_PAUSE_ACTION = 'MU_PAUSE_ACTION';
 
 import {
-  MUEventListeners,
+  MU_DEFAULT_OPTION_TYPE,
+  MU_OPTION_TYPE,
   MU_EVENT_TYPE,
+  MUEventListeners,
+  MUBaseParams,
   MUCustomRequest,
   MUCheckParams,
   MUUploadParams,
   MUMergeParams,
-  MU_DEFAULT_OPTION_TYPE,
-  MU_OPTION_TYPE,
-  MU_Options,
-  MU_DEFAULT_OPTIONS,
+  MUDefaultOptions,
+  MUOptions,
 } from './types';
 
 export default class MultipartUploader {
@@ -27,16 +28,17 @@ export default class MultipartUploader {
 
   active = false;
 
-  private readonly _options: MU_Options = null;
+  private readonly _options: MUOptions = null;
 
   private listeners: MUEventListeners = {
     [MU_EVENT_TYPE.BEFORE_COMPUTE_MD5]: new Set(),
     [MU_EVENT_TYPE.FINISH_COMPUTE_MD5]: new Set(),
     [MU_EVENT_TYPE.BEFORE_UPLOAD]: new Set(),
+    [MU_EVENT_TYPE.FINISH_UPLOAD]: new Set(),
+    [MU_EVENT_TYPE.UPLOADING]: new Set(),
     [MU_EVENT_TYPE.PROGRESS]: new Set(),
     [MU_EVENT_TYPE.BEFORE_MERGE]: new Set(),
     [MU_EVENT_TYPE.FINISH_MERGE]: new Set(),
-    [MU_EVENT_TYPE.UPLOADING]: new Set(),
     [MU_EVENT_TYPE.PAUSED]: new Set(),
     [MU_EVENT_TYPE.ERROR]: new Set(),
   };
@@ -45,7 +47,7 @@ export default class MultipartUploader {
 
   [key: string | symbol]: any;
 
-  constructor(options: MU_Options) {
+  constructor(options: MUOptions) {
     this.file = options.file;
     this._options = options;
 
@@ -72,14 +74,12 @@ export default class MultipartUploader {
   async computeMD5() {
     try {
       this.fire(MU_EVENT_TYPE.BEFORE_COMPUTE_MD5);
-      computeMD5({ chunkList: this.chunkList, chunkSize: this.chunkSize })
-        .then((md5) => {
-          this._md5 = md5 as string;
-          this.fire(MU_EVENT_TYPE.FINISH_COMPUTE_MD5, md5);
-        })
-        .catch((err) => {
-          this.fire(MU_EVENT_TYPE.ERROR, err);
-        });
+      this._md5 = (await computeMD5({
+        chunkList: this.chunkList,
+        chunkSize: this.chunkSize,
+      })) as string;
+      this.fire(MU_EVENT_TYPE.FINISH_COMPUTE_MD5, this._md5);
+      return this._md5;
     } catch (err) {
       console.log('err(s) were thrown while computtting md5: ', err);
       this.fire(MU_EVENT_TYPE.ERROR, err);
@@ -111,6 +111,8 @@ export default class MultipartUploader {
       );
       return;
     }
+
+    this.fire(MU_EVENT_TYPE.BEFORE_UPLOAD);
 
     try {
       if (!this.options.checkEachChunk) {
@@ -222,7 +224,19 @@ export default class MultipartUploader {
         );
       }
 
-      return await this.merge();
+      this.active = false;
+      this.fire(MU_EVENT_TYPE.FINISH_UPLOAD);
+
+      if (
+        this.options.shouldMerge({
+          file: this.file,
+          md5: this.md5,
+          chunks: this.chunks,
+        })
+      ) {
+        await this.merge();
+      }
+      return true;
     } catch (err) {
       if (err && err.message === MU_PAUSE_ACTION) {
         this.fire(MU_EVENT_TYPE.PAUSED);
@@ -234,7 +248,7 @@ export default class MultipartUploader {
     }
   }
 
-  pause() {
+  pause(): boolean {
     if (this.md5) {
       try {
         this.uploadQueue.forEach((cancelSource) =>
@@ -249,32 +263,35 @@ export default class MultipartUploader {
     }
   }
 
-  async merge() {
-    this.fire(MU_EVENT_TYPE.BEFORE_MERGE);
+  async merge(): Promise<any> {
+    try {
+      this.fire(MU_EVENT_TYPE.BEFORE_MERGE);
 
-    const {
-      method = 'POST',
-      headers = {},
-      params = {},
-      data = null,
-    } = this.options.customMergeRequest({
-      file: this.file,
-      md5: this.md5,
-      chunks: this.chunks,
-    });
+      const {
+        method = 'POST',
+        headers = {},
+        params = {},
+        data = null,
+      } = this.options.customMergeRequest({
+        file: this.file,
+        md5: this.md5,
+        chunks: this.chunks,
+      });
 
-    const mergeRes = await Axios({
-      url: this.options.mergeApi,
-      method,
-      headers,
-      params,
-      data,
-    });
+      const mergeRes = await Axios({
+        url: this.options.mergeApi,
+        method,
+        headers,
+        params,
+        data,
+      });
 
-    this.active = false;
-    this.fire(MU_EVENT_TYPE.FINISH_MERGE, mergeRes);
+      this.fire(MU_EVENT_TYPE.FINISH_MERGE, mergeRes);
 
-    return mergeRes;
+      return mergeRes;
+    } catch (err) {
+      this.fire(MU_EVENT_TYPE.ERROR, err);
+    }
   }
 
   // unified event firer
@@ -313,7 +330,7 @@ export default class MultipartUploader {
   }
 
   // unified options getter
-  private readonly options: MU_Options = new Proxy(
+  private readonly options: MUOptions = new Proxy(
     { ...this._options },
     {
       get: (_, key: MU_OPTION_TYPE) => {
@@ -325,7 +342,7 @@ export default class MultipartUploader {
     }
   );
 
-  static defaults: MU_DEFAULT_OPTIONS = {
+  static defaults: MUDefaultOptions = {
     [MU_DEFAULT_OPTION_TYPE.CHUNK_SIZE]: 1024 * 1024 * 25,
 
     [MU_DEFAULT_OPTION_TYPE.CHECK_API]: '',
@@ -371,6 +388,10 @@ export default class MultipartUploader {
       checkRes: any,
       params: MUUploadParams
     ): boolean {
+      return true;
+    },
+
+    [MU_DEFAULT_OPTION_TYPE.SHOULD_MERGE](params: MUBaseParams) {
       return true;
     },
   };
