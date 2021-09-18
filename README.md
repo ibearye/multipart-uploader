@@ -224,7 +224,7 @@ Pause the upload mission.
 
 #### merge(): Promise<any>
 
-merge chunks to a file. This function will be call when all chunks were uploaded, and `shouldMerge` function returns `true`;
+merge chunks to a file. This function will be call when all chunks have been uploaded and the `shouldMerge` function returns `true`;
 
 You can configure the `shouldMerge` function to return false, then do something else, and call `merge` function yourself.
 
@@ -254,5 +254,6 @@ Remove a listener from uploader.
 
 look `./examle` folder. The web-side demo is base on VUE.
 
-> ❗️❗️❗️Do not use the example code for you upload service❗️❗️❗️
-> ❗️❗️❗️The example is only for dev-test, there are a lot of problems in demo-code.❗️❗️❗️
+> Do not use the example code for you upload service❗️❗️❗️
+>
+> The example is only for dev-test, there are a lot of problems in demo-code.❗️❗️❗️
