@@ -100,6 +100,8 @@ function(params) {
 
 After understandding this option, you can configure `customUploadReqeust` and `customMergeRequest` options. they both has one param and should return an Object like the above.
 
+> All custom function will be called by uploader instance, do not pass arrow function❗️❗️❗️
+
 #### customUploadRequest
 
 It is very similar to customCheckRequest. the only difference is the param `chunk` and `chunkNumber` always exist.

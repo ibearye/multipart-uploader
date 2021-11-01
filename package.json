@@ -1,6 +1,6 @@
 {
   "name": "multipart-uploader",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "description": "A customizable, useful and wonderful multi-part file uploader, support \"resume from break-point\".",
   "main": "dist/multipart-uploader.js",
   "module": "dist/multipart-uploader.js",
