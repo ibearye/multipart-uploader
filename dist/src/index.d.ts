@@ -1,21 +1,21 @@
-import { MU_EVENT_TYPE, MU_Options, MU_DEFAULT_OPTIONS } from './types';
+import { MU_EVENT_TYPE, MUDefaultOptions, MUOptions } from './types';
 export default class MultipartUploader {
     readonly file: File;
     readonly chunkList: Blob[];
     readonly chunks: number;
     readonly uploaded: number[];
     private uploadQueue;
-    private checkRes;
+    checkRes: any;
     active: boolean;
     private readonly _options;
     private listeners;
     private _md5;
     [key: string | symbol]: any;
-    constructor(options: MU_Options);
-    computeMD5(): Promise<void>;
-    assume(): Promise<false | import("axios").AxiosResponse<any>>;
+    constructor(options: MUOptions);
+    computeMD5(): Promise<string>;
+    assume(): Promise<boolean>;
     pause(): boolean;
-    merge(): Promise<import("axios").AxiosResponse<any>>;
+    merge(): Promise<any>;
     private fire;
     on(event: MU_EVENT_TYPE, callback: Function): void;
     off(event: MU_EVENT_TYPE, callback: Function): void;
@@ -25,5 +25,5 @@ export default class MultipartUploader {
         percent: number;
     };
     private readonly options;
-    static defaults: MU_DEFAULT_OPTIONS;
+    static defaults: MUDefaultOptions;
 }

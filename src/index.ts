@@ -121,7 +121,7 @@ export default class MultipartUploader {
           headers = {},
           params = {},
           data = null,
-        } = this.options.customCheckRequest({
+        } = this.options.customCheckRequest.call(this, {
           file: this.file,
           md5: this.md5,
           chunks: this.chunks,
@@ -164,7 +164,7 @@ export default class MultipartUploader {
                 headers = {},
                 params = {},
                 data = null,
-              } = this.options.customCheckRequest({
+              } = this.options.customCheckRequest.call(this, {
                 file: this.file,
                 md5: this.md5,
                 chunks: this.chunks,
@@ -182,13 +182,17 @@ export default class MultipartUploader {
               });
             }
 
-            const shouldUpload = this.options.shouldUpload(checkRes, {
-              file: this.file,
-              md5: this.md5,
-              chunks: this.chunks,
-              chunk,
-              chunkNumber,
-            });
+            const shouldUpload = this.options.shouldUpload.call(
+              this,
+              checkRes,
+              {
+                file: this.file,
+                md5: this.md5,
+                chunks: this.chunks,
+                chunk,
+                chunkNumber,
+              }
+            );
 
             if (shouldUpload) {
               const {
@@ -196,7 +200,7 @@ export default class MultipartUploader {
                 headers = {},
                 params = {},
                 data = null,
-              } = this.options.customUploadRequest({
+              } = this.options.customUploadRequest.call(this, {
                 file: this.file,
                 md5: this.md5,
                 chunks: this.chunks,
@@ -228,7 +232,7 @@ export default class MultipartUploader {
       this.fire(MU_EVENT_TYPE.FINISH_UPLOAD);
 
       if (
-        this.options.shouldMerge({
+        this.options.shouldMerge.call(this, {
           file: this.file,
           md5: this.md5,
           chunks: this.chunks,
@@ -272,7 +276,7 @@ export default class MultipartUploader {
         headers = {},
         params = {},
         data = null,
-      } = this.options.customMergeRequest({
+      } = this.options.customMergeRequest.call(this, {
         file: this.file,
         md5: this.md5,
         chunks: this.chunks,
