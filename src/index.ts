@@ -24,7 +24,7 @@ export default class MultipartUploader {
   readonly chunks: number;
   readonly uploaded: number[];
   private uploadQueue: CancelTokenSource[] = [];
-  private checkRes: any = null;
+  checkRes: any = null;
 
   active = false;
 
