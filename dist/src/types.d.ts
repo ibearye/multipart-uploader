@@ -1,4 +1,4 @@
-import { Method } from 'axios';
+import { Method, AxiosInstance } from 'axios';
 export interface MUCustomRequest {
     method?: Method;
     headers?: {
@@ -50,7 +50,8 @@ export declare enum MU_DEFAULT_OPTION_TYPE {
     CUSTOM_MERGE_REQUEST = "customMergeRequest",
     SHOULD_UPLOAD = "shouldUpload",
     SHOULD_MERGE = "shouldMerge",
-    CONCURRENT_LIMIT = "concurrentLimit"
+    CONCURRENT_LIMIT = "concurrentLimit",
+    AXIOS_INSTANCE = "request"
 }
 export declare enum MU_EXTRA_OPTION_TYPE {
     FILE = "file"
@@ -68,6 +69,7 @@ export interface MUDefaultOptions {
     shouldUpload?: (checkRes?: unknown, params?: MUUploadParams) => boolean;
     shouldMerge?: (params?: MUBaseParams) => boolean;
     concurrentLimit?: number;
+    request: AxiosInstance;
 }
 export interface MUOptions extends MUDefaultOptions {
     file: File;

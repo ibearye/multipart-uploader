@@ -26,7 +26,7 @@ module.exports = {
     libraryTarget: 'umd',
     globalObject: 'this',
     libraryExport: 'default',
-    library: 'MultiUploader',
+    library: 'MultipartUploader',
   },
 
   module: {

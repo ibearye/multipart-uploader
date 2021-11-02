@@ -65,6 +65,7 @@ uploader.on('finish-compute-md5', () => {
 | customMergeRequest  | `Function` |         | \*                 | custom the merge request, the option detail is in below.                          |
 | shouldUpload        | `Function` |         | \*                 | decide current chunk whether should upload or not, the option detail is in below. |
 | shouldMerge         | `Function` |         | \*                 | decide whether should make a merge request or not, the option detail is in below. |
+| request | AxiosInstance | | axios.create() | MultipartUploader will take requests use this http-tool. |
 
 > All options exclude `file` can be configured in `MultipartUploader.defaults`❗️❗️❗️
 

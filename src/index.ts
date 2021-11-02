@@ -1,6 +1,8 @@
 import computeMD5 from './libs/compute-md5';
-import Axios, { CancelTokenSource } from 'axios';
-const { CancelToken } = Axios;
+import axios, { CancelTokenSource } from 'axios';
+const { CancelToken } = axios;
+
+const request = axios.create();
 
 const MU_PAUSE_ACTION = 'MU_PAUSE_ACTION';
 
@@ -127,8 +129,10 @@ export default class MultipartUploader {
           chunks: this.chunks,
         });
 
-        this.checkRes = await Axios({
-          url: this.checkApi,
+        // this.checkRes = await request({
+
+        this.checkRes = await this.options.request({
+          url: this.options.checkApi,
           method,
           headers,
           params,
@@ -172,7 +176,8 @@ export default class MultipartUploader {
                 chunkNumber,
               });
 
-              checkRes = await Axios({
+              // checkRes = await request({
+              checkRes = await this.options.request({
                 url: this.options.checkApi,
                 method,
                 headers,
@@ -208,7 +213,8 @@ export default class MultipartUploader {
                 chunkNumber,
               });
 
-              await Axios({
+              // await request({
+              await this.options.request({
                 url: this.options.uploadApi,
                 method,
                 headers,
@@ -282,7 +288,8 @@ export default class MultipartUploader {
         chunks: this.chunks,
       });
 
-      const mergeRes = await Axios({
+      // const mergeRes = await request({
+      const mergeRes = await this.options.request({
         url: this.options.mergeApi,
         method,
         headers,
@@ -354,6 +361,7 @@ export default class MultipartUploader {
     [MU_DEFAULT_OPTION_TYPE.MERGE_API]: '',
     [MU_DEFAULT_OPTION_TYPE.CHECK_EACH_CHUNK]: true,
     [MU_DEFAULT_OPTION_TYPE.CONCURRENT_LIMIT]: 8,
+    [MU_DEFAULT_OPTION_TYPE.AXIOS_INSTANCE]: axios.create(),
 
     [MU_DEFAULT_OPTION_TYPE.CUSTOM_CHECK_REQUEST](
       params: MUCheckParams
