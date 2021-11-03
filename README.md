@@ -231,13 +231,17 @@ merge chunks to a file. This function will be call when all chunks have been upl
 
 You can configure the `shouldMerge` function to return false, then do something else, and call `merge` function yourself.
 
-#### on(event: string, callback: Function): never
+#### on(event: string, callback: Function): void
 
 Add a listener to uploader, the function will be called while firing events related.
 
-#### off(event, callback: Function): never
+#### off(event, callback: Function): void
 
 Remove a listener from uploader.
+
+#### offAll(event): void
+
+Remove all listeners of one event from uploader.
 
 ### Events
 

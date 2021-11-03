@@ -310,7 +310,7 @@ export default class MultipartUploader {
   // unified event firer
   private fire(event: MU_EVENT_TYPE, ...params: any) {
     for (const callback of this.listeners[event]) {
-      callback(...params);
+      callback && callback(...params);
     }
   }
 
@@ -326,9 +326,14 @@ export default class MultipartUploader {
     this.listeners[event].add(callback);
   }
 
-  // unlisten uploader events
+  // unlisten uploader event, just remove one callback
   off(event: MU_EVENT_TYPE, callback: Function) {
     this.listeners[event].delete(callback);
+  }
+
+  // unlisten event absolutely
+  offAll(event: MU_EVENT_TYPE) {
+    this.listeners[event].clear();
   }
 
   get md5() {

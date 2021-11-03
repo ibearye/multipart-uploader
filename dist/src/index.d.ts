@@ -19,6 +19,7 @@ export default class MultipartUploader {
     private fire;
     on(event: MU_EVENT_TYPE, callback: Function): void;
     off(event: MU_EVENT_TYPE, callback: Function): void;
+    offAll(event: MU_EVENT_TYPE): void;
     get md5(): string;
     get progress(): {
         uploaded: number;
