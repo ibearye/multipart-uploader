@@ -249,10 +249,10 @@ export default class MultipartUploader {
     } catch (err) {
       if (err && err.message === MU_PAUSE_ACTION) {
         this.fire(MU_EVENT_TYPE.PAUSED);
-        this.active = false;
       } else {
         this.fire(MU_EVENT_TYPE.ERROR, err);
       }
+      this.active = false;
       return false;
     }
   }
