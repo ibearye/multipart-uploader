@@ -2,8 +2,6 @@ import computeMD5 from './libs/compute-md5';
 import axios, { CancelTokenSource } from 'axios';
 const { CancelToken } = axios;
 
-const request = axios.create();
-
 const MU_PAUSE_ACTION = 'MU_PAUSE_ACTION';
 
 import {
@@ -107,14 +105,14 @@ export default class MultipartUploader {
     }
 
     if (this.active) {
-      this.fire(
-        MU_EVENT_TYPE.ERROR,
-        new Error('Mission is keeping on, do not assume repeately!')
-      );
       return;
     }
 
     this.fire(MU_EVENT_TYPE.BEFORE_UPLOAD);
+
+    this.fire(MU_EVENT_TYPE.UPLOADING);
+
+    this.active = true;
 
     try {
       if (!this.options.checkEachChunk) {
@@ -144,8 +142,9 @@ export default class MultipartUploader {
         this.chunkList.length / this.options.concurrentLimit
       );
 
-      this.active = true;
-      this.fire(MU_EVENT_TYPE.UPLOADING);
+      if (!this.active) {
+        throw new Error(MU_PAUSE_ACTION);
+      }
 
       for (let i = 0; i < concurrentQueueCount; i++) {
         const currentQueue = this.chunkList.slice(
@@ -259,7 +258,7 @@ export default class MultipartUploader {
   }
 
   pause(): boolean {
-    if (this.md5) {
+    if (this.active) {
       try {
         this.uploadQueue.forEach((cancelSource) =>
           cancelSource.cancel(MU_PAUSE_ACTION)
@@ -270,6 +269,9 @@ export default class MultipartUploader {
         this.fire(MU_EVENT_TYPE.ERROR, err);
         return false;
       }
+    } else {
+      this.active = false;
+      return true;
     }
   }
 
