@@ -253,7 +253,7 @@ export default class MultipartUploader {
         this.fire(MU_EVENT_TYPE.ERROR, err);
       }
       this.active = false;
-      return false;
+      throw err;
     }
   }
 
@@ -304,6 +304,7 @@ export default class MultipartUploader {
       return mergeRes;
     } catch (err) {
       this.fire(MU_EVENT_TYPE.ERROR, err);
+      throw err;
     }
   }
 
